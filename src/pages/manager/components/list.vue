@@ -33,7 +33,6 @@ export default {
   methods: {
     edit(uid) {
       //告诉父组件要拿这个值了
-      console.log(uid);
       this.$emit("getDetail", uid);
     },
     del(uid) {

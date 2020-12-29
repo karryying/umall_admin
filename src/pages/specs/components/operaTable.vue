@@ -38,7 +38,7 @@ import {
   getSpecsDetail,
   reqSpecsUpdate,
 } from "../../../utils/http";
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -53,6 +53,19 @@ export default {
     };
   },
   methods: {
+    valitSpecs() {
+      return new Promise((resolve, reject) => {
+        if (this.specs.specsname === "") {
+          errorAlert("请输入规格名称");
+          return;
+        }
+        if (this.input.some((item) => item.input === "")) {
+          errorAlert("请输入所有的规格");
+          return;
+        }
+        resolve();
+      });
+    },
     //关闭对话框
     cancel() {
       if (!this.info.isadd) {
@@ -73,15 +86,17 @@ export default {
       };
     },
     add() {
-      this.specs.attrs = JSON.stringify(this.input.map((item) => item.input));
-      //添加操作
-      reqSpecsAdd(this.specs).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          this.cancel();
-          this.clearSpecs();
-          this.reqList();
-        }
+      this.valitSpecs().then(() => {
+        this.specs.attrs = JSON.stringify(this.input.map((item) => item.input));
+        //添加操作
+        reqSpecsAdd(this.specs).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            this.cancel();
+            this.clearSpecs();
+            this.reqList();
+          }
+        });
       });
     },
     getDetail(id) {
@@ -96,15 +111,17 @@ export default {
       });
     },
     edit() {
-      this.specs.attrs = JSON.stringify(this.input.map((item) => item.input));
-      reqSpecsUpdate().then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //更新
-          this.cancel();
-          this.clearSpecs();
-          this.reqList();
-        }
+      this.valitSpecs().then(() => {
+        this.specs.attrs = JSON.stringify(this.input.map((item) => item.input));
+        reqSpecsUpdate().then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //更新
+            this.cancel();
+            this.clearSpecs();
+            this.reqList();
+          }
+        });
       });
     },
     addNode() {

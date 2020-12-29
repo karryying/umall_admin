@@ -31,8 +31,9 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import { reqUserAdd, getUserDetail, reqUserUpdate } from "../../../utils/http";
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 export default {
   props: ["info", "roles"],
   data() {
@@ -46,6 +47,23 @@ export default {
     };
   },
   methods: {
+    valitManager() {
+      return new Promise((resolve, reject) => {
+        if (this.manager.roleid === 0) {
+          errorAlert("请选择所属角色");
+          return;
+        }
+        if (this.manager.username === "") {
+          errorAlert("请输入用户名");
+          return;
+        }
+        if (this.manager.password === "") {
+          errorAlert("请输入密码");
+          return;
+        }
+        resolve();
+      });
+    },
     clearManager() {
       this.manager = {
         roleid: 0,
@@ -62,26 +80,31 @@ export default {
       this.info.isshow = false;
     },
     add() {
-      //添加操作
-      this.manager.password = this.password;
-      reqUserAdd(this.manager).then((res) => {
-        if (res.data.code === 200) {
-          //成功
-          successAlert(res.data.msg);
-          //告诉父组件刷新页面
-          this.$emit("init");
-          //关闭弹窗
-          this.info.isshow = false;
-          //清空操作
-          this.clearManager();
-        }
+      this.valitManager().then(() => {
+        //添加操作
+        this.manager.password = this.password;
+        reqUserAdd(this.manager).then((res) => {
+          if (res.data.code === 200) {
+            //成功
+            successAlert(res.data.msg);
+            //告诉父组件刷新页面
+            this.$emit("init");
+            //关闭弹窗
+            this.info.isshow = false;
+            //清空操作
+            this.clearManager();
+          }
+        });
       });
     },
     getDetail(id) {
+      console.log(id);
       //获取一条会员的信息
       getUserDetail({ uid: id }).then((res) => {
         if (res.data.code === 200) {
           this.manager = res.data.list;
+          this.manager.uid = id;
+          console.log(this.manager);
           //判断当前管理员所对应的角色有没有被删除
           let index = this.roles.findIndex((item) => {
             return this.manager.roleid === item.id;
@@ -95,18 +118,28 @@ export default {
       //赋值
     },
     edit() {
-      //做修改操作
-      reqUserUpdate(this.manager).then((res) => {
-        if (res.data.code == 200) {
-          successAlert(res.data.msg);
-        }
+      this.valitManager().then(() => {
+        //做修改操作
+        console.log(this.manager);
+        reqUserUpdate(this.manager).then((res) => {
+          if (res.data.code == 200) {
+            console.log(this.manager.uid, this.userInfo);
+            if (this.manager.uid === this.userInfo.uid) {
+              //让用户重新登录
+              successAlert(res.data.msg + "请重新登录");
+              this.$router.replace("/login");
+              return;
+            }
+            successAlert(res.data.msg);
+            //告诉父组件刷新页面
+            this.$emit("init");
+            //关闭弹窗
+            this.info.isshow = false;
+            //清空操作
+            this.clearManager();
+          }
+        });
       });
-      //告诉父组件刷新页面
-      this.$emit("init");
-      //关闭弹窗
-      this.info.isshow = false;
-      //清空操作
-      this.clearManager();
     },
   },
   computed: {
@@ -118,6 +151,9 @@ export default {
         return role;
       }
     },
+    ...mapGetters({
+      userInfo: "userInfo",
+    }),
   },
   mounted() {},
 };

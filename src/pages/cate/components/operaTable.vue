@@ -60,6 +60,24 @@ export default {
     };
   },
   methods: {
+    valitCate() {
+      return new Promise((resolve, reject) => {
+        if (this.cate.pid === "") {
+          errorAlert("请选择上级分类");
+          return;
+        }
+        if (this.cate.catename === "") {
+          errorAlert("请输入分类名称");
+          return;
+        }
+        console.log(this.cate.pid);
+        if (this.cate.pid !== 0 && this.cate.img === null) {
+          errorAlert("请上传图片");
+          returnl;
+        }
+        resolve();
+      });
+    },
     clearCate() {
       this.cate = {
         pid: 0,
@@ -95,13 +113,15 @@ export default {
     },
     //商品分类添加
     add() {
-      reqCateAdd(this.cate).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          this.clearCate();
-          this.$emit("init");
-          this.cancel();
-        }
+      this.valitCate().then(() => {
+        reqCateAdd(this.cate).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            this.clearCate();
+            this.$emit("init");
+            this.cancel();
+          }
+        });
       });
     },
     getDetail(id) {
@@ -115,21 +135,22 @@ export default {
       });
     },
     edit() {
-      //执行编辑操作
-      reqCateUpdate(this.cate).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //清空数据
-          this.clearCate();
-          //关闭页面
-          this.cancel();
-          //告诉父组件刷新页面
-          this.$emit("init");
-        }
+      this.valitCate().then(() => {
+        //执行编辑操作
+        reqCateUpdate(this.cate).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //清空数据
+            this.clearCate();
+            //关闭页面
+            this.cancel();
+            //告诉父组件刷新页面
+            this.$emit("init");
+          }
+        });
       });
     },
   },
-  mounted() {},
 };
 </script>
 

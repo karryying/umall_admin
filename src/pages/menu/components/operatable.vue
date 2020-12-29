@@ -49,7 +49,7 @@
 <script>
 import { reqMenuAdd, getMenuDetail, reqMenuUpdate } from "../../../utils/http";
 import { indexRouter } from "../../../router/index";
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 export default {
   props: ["info", "list"],
   data() {
@@ -76,6 +76,23 @@ export default {
     };
   },
   methods: {
+    valitMenu() {
+      return new Promise((resolve, reject) => {
+        if (this.menu.title === "") {
+          errorAlert("请输入菜单名称");
+          return;
+        }
+        if (this.menu.pid === 0 && this.menu.icon === "") {
+          errorAlert("请选择菜单图标");
+          return;
+        }
+        if (this.menu.pid !== 0 && this.menu.url === "") {
+          errorAlert("请选择菜单路径");
+          return;
+        }
+        resolve();
+      });
+    },
     clearMenu() {
       this.menu = {
         pid: 0,
@@ -95,20 +112,20 @@ export default {
       this.info.isshow = false;
     },
     add() {
-      console.log("触发");
-      console.log(this.menu);
-      //添加操作
-      reqMenuAdd(this.menu).then((res) => {
-        if (res.data.code == 200) {
-          //添加成功
-          successAlert(res.data.msg);
-          //告诉父组件更新列表
-          this.$emit("init");
-          //关闭弹框
-          this.cancel();
-          //清空
-          this.clearMenu();
-        }
+      this.valitMenu().then(() => {
+        //添加操作
+        reqMenuAdd(this.menu).then((res) => {
+          if (res.data.code == 200) {
+            //添加成功
+            successAlert(res.data.msg);
+            //告诉父组件更新列表
+            this.$emit("init");
+            //关闭弹框
+            this.cancel();
+            //清空
+            this.clearMenu();
+          }
+        });
       });
     },
     // 当
@@ -131,15 +148,17 @@ export default {
       });
     },
     edit() {
-      reqMenuUpdate(this.menu).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //弹窗关闭
-          this.cancel();
-          //清空
-          this.clearMenu();
-          this.$emit("init");
-        }
+      this.valitMenu().then((res) => {
+        reqMenuUpdate(this.menu).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //弹窗关闭
+            this.cancel();
+            //清空
+            this.clearMenu();
+            this.$emit("init");
+          }
+        });
       });
     },
     closed() {

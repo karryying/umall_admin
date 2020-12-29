@@ -2,10 +2,15 @@
   <div class="login">
     <div class="con">
       <h3>登录</h3>
-      <div class="ipt">
-        <el-input placeholder="请输入内容" v-model="user.username" clearable></el-input>
-        <el-input placeholder="请输入密码" v-model="user.password" clearable show-password></el-input>
-      </div>
+      <el-form :model="user" :rules="rules" class="demo-ruleForm">
+        <el-form-item prop="username">
+          <el-input placeholder="请输入账号" v-model="user.username" clearable></el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input placeholder="请输入密码" v-model="user.password" clearable show-password></el-input>
+        </el-form-item>
+      </el-form>
+      <div class="ipt"></div>
       <el-button type="primary" @click="login">登录</el-button>
     </div>
   </div>
@@ -13,6 +18,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import { errorAlert } from "../../utils/alert";
 import { reqUserLogin } from "../../utils/http";
 export default {
   data() {
@@ -21,6 +27,16 @@ export default {
         username: "",
         password: "",
       },
+      rules: {
+        username: [
+          { required: true, message: "请输入账号", trigger: "blur" },
+          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
+        ],
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 3, max: 7, message: "长度在 3 到 5 个字符", trigger: "blur" },
+        ],
+      },
     };
   },
   methods: {
@@ -28,6 +44,14 @@ export default {
       reqUserInfo: "reqUserInfo",
     }),
     login() {
+      if (this.user.username === "") {
+        errorAlert("请输入账号");
+        return;
+      }
+      if (this.user.password === "") {
+        errorAlert("请输入密码");
+        return;
+      }
       reqUserLogin(this.user).then((res) => {
         if (res.data.code === 200) {
           //设置值

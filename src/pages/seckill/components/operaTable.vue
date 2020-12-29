@@ -61,7 +61,7 @@
 <script>
 import { reqSeckAdd, getSeckDetail, reqSeckUpdate } from "../../../utils/http";
 import { mapGetters, mapActions } from "vuex";
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -88,6 +88,29 @@ export default {
     }),
   },
   methods: {
+    valitSeckill() {
+      if (this.seckill.title === "") {
+        errorAlert("请输入活动名称");
+        return;
+      }
+      if (this.time.length === 0) {
+        errorAlert("请选择时间");
+        return;
+      }
+      if (this.seckill.first_cateid === "") {
+        errorAlert("请选择一级分类");
+        return;
+      }
+      if (this.seckill.second_cateid === "") {
+        errorAlert("请选择二级分类");
+        return;
+      }
+      if (this.seckill.goodsid === "") {
+        errorAlert("请选择商品");
+        return;
+      }
+      resolve();
+    },
     //点击取消  和关闭对话框
     cancel() {
       if (!this.info.isadd) {
@@ -111,14 +134,8 @@ export default {
     },
     //获取时间戳
     getTime(time) {
-      var date = null;
-      if (typeof time === "object") {
-        //转换成时间戳
-        date = time;
-      } else {
-        //转换成日期对象
-        date = new Date(parseInt(time));
-      }
+      var date = new Date(parseInt(time));
+
       var y = date.getFullYear();
       var m = this.zero(date.getMonth() + 1);
       var d = this.zero(date.getDate());
@@ -127,9 +144,7 @@ export default {
       var mi = this.zero(date.getMinutes());
       var s = this.zero(date.getSeconds());
       //当参数为时间对象时返回的数据和当参数为时间戳时返回的数据
-      return typeof time === "object"
-        ? new Date(`${y}-${m}-${d} ${h}:${mi}:${s}`).getTime()
-        : `${y}-${m}-${d} ${h}:${mi}:${s}`;
+      return `${y}-${m}-${d} ${h}:${mi}:${s}`;
     },
     zero(time) {
       //补零操作
@@ -137,17 +152,19 @@ export default {
     },
     //添加
     add() {
-      //分别给开始时间和结束时间赋值
-      this.seckill.begintime = this.getTime(this.time[0]);
-      this.seckill.endtime = this.getTime(this.time[1]);
-      reqSeckAdd(this.seckill).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          this.cancel();
-          this.clearSeckill();
-          //刷新列表
-          this.$emit("init");
-        }
+      this.valitSeckill().then(() => {
+        //分别给开始时间和结束时间赋值
+        this.seckill.begintime = new Date(this.time[0]).getTime();
+        this.seckill.endtime = new Date(this.time[1]).getTime();
+        reqSeckAdd(this.seckill).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            this.cancel();
+            this.clearSeckill();
+            //刷新列表
+            this.$emit("init");
+          }
+        });
       });
     },
     //获取一条详细信息
@@ -171,17 +188,19 @@ export default {
     },
     //修改
     edit() {
-      //给开始和结束时间赋值
-      this.seckill.begintime = new Date(this.time[0]).getTime();
-      this.seckill.endtime = new Date(this.time[1]).getTime();
-      reqSeckUpdate(this.seckill).then((res) => {
-        if (res.data.code == 200) {
-          successAlert(res.data.msg);
-          this.cancel();
-          this.clearSeckill();
-          //刷新页面
-          this.$emit("init");
-        }
+      this.valitSeckill().then(() => {
+        //给开始和结束时间赋值
+        this.seckill.begintime = new Date(this.time[0]).getTime();
+        this.seckill.endtime = new Date(this.time[1]).getTime();
+        reqSeckUpdate(this.seckill).then((res) => {
+          if (res.data.code == 200) {
+            successAlert(res.data.msg);
+            this.cancel();
+            this.clearSeckill();
+            //刷新页面
+            this.$emit("init");
+          }
+        });
       });
     },
     //当一级分类菜单发生改变时触发的函数

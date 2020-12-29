@@ -32,7 +32,7 @@
       </el-aside>
       <el-container>
         <el-header>
-          admin
+          {{userInfo.username}}
           <i class="el-icon-setting"></i>
           <el-button type="danger" @click="logout">退出登录</el-button>
         </el-header>

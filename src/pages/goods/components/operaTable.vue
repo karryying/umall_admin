@@ -86,7 +86,7 @@
 <script>
 import E from "wangeditor";
 import { mapGetters, mapActions } from "vuex";
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 import {
   reqGoodsAdd,
   getGoodsDetail,
@@ -119,6 +119,47 @@ export default {
     };
   },
   methods: {
+    valitGoods() {
+      return new Promise((resolve, reject) => {
+        if (this.goods.first_cateid === "") {
+          errorAlert("请选择一级分类");
+          return;
+        }
+        if (this.goods.second_cateid === "") {
+          errorAlert("请选择二级分类");
+          return;
+        }
+        if (this.goods.goodsname === "") {
+          errorAlert("请输入商品名称");
+          return;
+        }
+        if (this.goods.price === "") {
+          errorAlert("请输入商品价格");
+          return;
+        }
+        if (this.goods.market_price === "") {
+          errorAlert("请输入商品市场价格");
+          return;
+        }
+        if (this.goods.img === null) {
+          errorAlert("请上传图片");
+          return;
+        }
+        if (this.goods.specsid === "") {
+          errorAlert("请选择商品规格");
+          return;
+        }
+        if (this.goods.specsattr.length === 0) {
+          errorAlert("请选择规格属性");
+          return;
+        }
+        if (this.editor.txt.html() === "") {
+          errorAlert("请输入商品描述");
+          return;
+        }
+        resolve();
+      });
+    },
     del(id) {
       //删除
       reqGoodsDelete({ id: id }).then((res) => {
@@ -128,21 +169,23 @@ export default {
       });
     },
     add() {
-      //add操作
-      //获取内容并赋值
-      this.goods.description = this.editor.txt.html();
-      let data = {
-        ...this.goods,
-        specsattr: JSON.stringify(this.goods.specsattr),
-      };
-      reqGoodsAdd(data).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //添加成功以后关闭弹窗，重新加载页面
-          this.cancel();
-          this.clearGoods();
-          this.reqGoodsList();
-        }
+      this.valitGoods().then(() => {
+        //add操作
+        //获取内容并赋值
+        this.goods.description = this.editor.txt.html();
+        let data = {
+          ...this.goods,
+          specsattr: JSON.stringify(this.goods.specsattr),
+        };
+        reqGoodsAdd(data).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //添加成功以后关闭弹窗，重新加载页面
+            this.cancel();
+            this.clearGoods();
+            this.reqGoodsList();
+          }
+        });
       });
     },
     getDetail(id) {
@@ -169,20 +212,22 @@ export default {
       });
     },
     edit() {
-      this.goods.description = this.editor.txt.html();
-      let data = {
-        ...this.goods,
-        specsattr: JSON.stringify(this.goods.specsattr),
-      };
-      //修改
-      reqGoodsUpdate(data).then((res) => {
-        if (res.data.code === 200) {
-          //
-          successAlert(res.data.msg);
-          this.cancel();
-          this.clearGoods();
-          this.reqGoodsList();
-        }
+      this.valitGoods().then(() => {
+        this.goods.description = this.editor.txt.html();
+        let data = {
+          ...this.goods,
+          specsattr: JSON.stringify(this.goods.specsattr),
+        };
+        //修改
+        reqGoodsUpdate(data).then((res) => {
+          if (res.data.code === 200) {
+            //
+            successAlert(res.data.msg);
+            this.cancel();
+            this.clearGoods();
+            this.reqGoodsList();
+          }
+        });
       });
     },
     clearGoods() {

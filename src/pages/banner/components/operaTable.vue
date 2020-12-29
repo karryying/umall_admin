@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 import {
   getBannerDetail,
   reqBannerUpdate,
@@ -49,6 +49,19 @@ export default {
     };
   },
   methods: {
+    valitBanner() {
+      return new Promise((resolve, reject) => {
+        if (this.banner.title === "") {
+          errorAlert("请输入标题");
+          return;
+        }
+        if (this.banner.img === null) {
+          errorAlert("请上传图片");
+          return;
+        }
+        resolve();
+      });
+    },
     clearBanner() {
       this.banner = {
         title: "",
@@ -64,16 +77,17 @@ export default {
       this.info.isshow = false;
     },
     add() {
-      console.log(this.banner);
-      reqBannerAdd(this.banner).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //更新页面
-          this.$emit("init");
-          //清空
-          this.clearBanner();
-          this.cancel();
-        }
+      this.valitBanner().then(() => {
+        reqBannerAdd(this.banner).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //更新页面
+            this.$emit("init");
+            //清空
+            this.clearBanner();
+            this.cancel();
+          }
+        });
       });
     },
     getDetail(id) {
@@ -88,15 +102,16 @@ export default {
       });
     },
     edit() {
-      console.log(this.banner);
-      //修改操作
-      reqBannerUpdate(this.banner).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          this.$emit("init");
-          this.cancel();
-          this.clearBanner();
-        }
+      this.valitBanner().then(() => {
+        //修改操作
+        reqBannerUpdate(this.banner).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            this.$emit("init");
+            this.cancel();
+            this.clearBanner();
+          }
+        });
       });
     },
     changeFile(file) {

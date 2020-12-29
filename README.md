@@ -1,21 +1,62 @@
-# umall_admin
+# 小U商城后台管理
 
-> 小U商城手机端后台管理系统
+## 系统设置
 
-## Build Setup
+### 菜单管理
 
-``` bash
-# install dependencies
-npm install
+OK
 
-# serve with hot reload at localhost:8080
-npm run dev
+### 角色管理
 
-# build for production with minification
-npm run build
+OK
 
-# build for production and view the bundle analyzer report
-npm run build --report
-```
+### 管理员管理
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+OK
+
+## 商城管理
+
+### 商品分类
+
+OK
+
+### 商品规格
+
+OK
+
+### 商品管理
+
+OK
+
+### 会员管理
+
+OK
+
+### 轮播图管理
+
+OK
+
+### 秒杀活动
+
+OK
+
+## 首页图表
+
+ok
+
+## 用户登录、登出
+
+OK
+
+## 动态侧边栏
+
+OK
+
+## 添加、修改验证
+
+OK
+
+
+
+
+

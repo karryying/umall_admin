@@ -32,7 +32,7 @@ import {
   reqRoleUpdate,
 } from "../../../utils/http";
 import { mapActions, mapGetters } from "vuex";
-import { successAlert } from "../../../utils/alert";
+import { errorAlert, successAlert } from "../../../utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -54,11 +54,25 @@ export default {
     ...mapActions({
       reqMenuListAction: "menu/reqMenuListAction",
     }),
+    valitRole() {
+      return new Promise((resolve, reject) => {
+        if (this.role.rolename === "") {
+          errorAlert("请输入角色名称");
+          return;
+        }
+        if (
+          this.$refs.tree.getCheckedNodes().map((item) => item.id).length === 0
+        ) {
+          errorAlert("请选择权限");
+          return;
+        }
+        resolve();
+      });
+    },
     //清空
     clearRole() {
       this.clearDefaultKeys();
       this.role = {
-        id: 0,
         rolename: "",
         menus: "",
         status: 1,
@@ -73,29 +87,21 @@ export default {
     },
     //添加
     add() {
-      try {
+      this.valitRole().then(() => {
         this.role.menus = this.getCheckedNodes();
-      } catch (error) {}
-      //添加了
-      reqRoleAdd(this.role).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //关闭弹框
-          this.cancel();
-          //清空数据
-          this.clearRole();
-          //更新页面
-          this.$emit("init");
-        }
+        //添加了
+        reqRoleAdd(this.role).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //关闭弹框
+            this.cancel();
+            //清空数据
+            this.clearRole();
+            //更新页面
+            this.$emit("init");
+          }
+        });
       });
-    },
-    //获取选中的权限
-    getCheckedNodes() {
-      if (this.$refs.tree.getCheckedNodes()) {
-      }
-      return JSON.stringify(
-        this.$refs.tree.getCheckedNodes().map((item) => item.id)
-      );
     },
     //获取一个角色的信息
     getDetail(id) {
@@ -109,18 +115,26 @@ export default {
       });
     },
     edit() {
-      this.role.menus = this.getCheckedNodes();
-      reqRoleUpdate(this.role).then((res) => {
-        if (res.data.code === 200) {
-          successAlert(res.data.msg);
-          //关闭窗口
-          this.cancel();
-          //刷新页面
-          this.$emit("init");
-          //清空
-          this.clearRole();
-        }
+      this.valitRole().then(() => {
+        this.role.menus = this.getCheckedNodes();
+        reqRoleUpdate(this.role).then((res) => {
+          if (res.data.code === 200) {
+            successAlert(res.data.msg);
+            //关闭窗口
+            this.cancel();
+            //刷新页面
+            this.$emit("init");
+            //清空
+            this.clearRole();
+          }
+        });
       });
+    },
+    //获取选中的权限
+    getCheckedNodes() {
+      return JSON.stringify(
+        this.$refs.tree.getCheckedNodes().map((item) => item.id)
+      );
     },
     clearDefaultKeys() {
       this.role.menus = [];
