@@ -45,6 +45,7 @@
 <script>
 import { errorAlert, successAlert } from "../../../utils/alert";
 import { reqCateAdd, getCateDetail, reqCateUpdate } from "../../../utils/http";
+import { valitCate } from "../../../utils/validate";
 export default {
   props: ["info", "cateList"],
   data() {
@@ -60,24 +61,6 @@ export default {
     };
   },
   methods: {
-    valitCate() {
-      return new Promise((resolve, reject) => {
-        if (this.cate.pid === "") {
-          errorAlert("请选择上级分类");
-          return;
-        }
-        if (this.cate.catename === "") {
-          errorAlert("请输入分类名称");
-          return;
-        }
-        console.log(this.cate.pid);
-        if (this.cate.pid !== 0 && this.cate.img === null) {
-          errorAlert("请上传图片");
-          returnl;
-        }
-        resolve();
-      });
-    },
     clearCate() {
       this.cate = {
         pid: 0,
@@ -113,7 +96,7 @@ export default {
     },
     //商品分类添加
     add() {
-      this.valitCate().then(() => {
+      valitCate(this.cate).then(() => {
         reqCateAdd(this.cate).then((res) => {
           if (res.data.code === 200) {
             successAlert(res.data.msg);
@@ -135,7 +118,7 @@ export default {
       });
     },
     edit() {
-      this.valitCate().then(() => {
+      valitCate(this.cate).then(() => {
         //执行编辑操作
         reqCateUpdate(this.cate).then((res) => {
           if (res.data.code === 200) {

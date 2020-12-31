@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <div class="con">
-      <h3>登录</h3>
+      <h3 class="title">登录</h3>
       <el-form :model="user" :rules="rules" class="demo-ruleForm">
         <el-form-item prop="username">
           <el-input placeholder="请输入账号" v-model="user.username" clearable></el-input>
@@ -87,7 +87,16 @@ export default {
   text-align: center;
 }
 .con .ipt {
-  margin: 20px 0;
+  /* margin: 20px 0; */
+}
+form {
+  margin-top: 20px;
+}
+.el-form-item {
+  /* margin-bottom: 20px; */
+}
+.title {
+  font: 20px/30px "微软雅黑";
 }
 .con .el-input {
   margin: 10px 0;

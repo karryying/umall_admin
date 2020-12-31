@@ -33,6 +33,7 @@ import {
 } from "../../../utils/http";
 import { mapActions, mapGetters } from "vuex";
 import { errorAlert, successAlert } from "../../../utils/alert";
+import { valitRole } from "../../../utils/validate";
 export default {
   props: ["info"],
   data() {
@@ -54,21 +55,6 @@ export default {
     ...mapActions({
       reqMenuListAction: "menu/reqMenuListAction",
     }),
-    valitRole() {
-      return new Promise((resolve, reject) => {
-        if (this.role.rolename === "") {
-          errorAlert("请输入角色名称");
-          return;
-        }
-        if (
-          this.$refs.tree.getCheckedNodes().map((item) => item.id).length === 0
-        ) {
-          errorAlert("请选择权限");
-          return;
-        }
-        resolve();
-      });
-    },
     //清空
     clearRole() {
       this.clearDefaultKeys();
@@ -87,7 +73,9 @@ export default {
     },
     //添加
     add() {
-      this.valitRole().then(() => {
+      let flag =
+        this.$refs.tree.getCheckedNodes().map((item) => item.id).length === 0;
+      valitRole(this.role, flag).then(() => {
         this.role.menus = this.getCheckedNodes();
         //添加了
         reqRoleAdd(this.role).then((res) => {
@@ -115,7 +103,9 @@ export default {
       });
     },
     edit() {
-      this.valitRole().then(() => {
+      let flag =
+        this.$refs.tree.getCheckedNodes().map((item) => item.id).length === 0;
+      valitRole(this.role, flag).then(() => {
         this.role.menus = this.getCheckedNodes();
         reqRoleUpdate(this.role).then((res) => {
           if (res.data.code === 200) {

@@ -7,6 +7,7 @@
         </el-form-item>
         <el-form-item label="上级菜单" label-width="120px" required>
           <el-select v-model="menu.pid" @change="changePid(menu.pid)">
+            <el-option value label="--请选择--"></el-option>
             <el-option :value="0" label="顶级菜单">顶级菜单</el-option>
             <el-option
               v-for="item in list"
@@ -50,12 +51,13 @@
 import { reqMenuAdd, getMenuDetail, reqMenuUpdate } from "../../../utils/http";
 import { indexRouter } from "../../../router/index";
 import { errorAlert, successAlert } from "../../../utils/alert";
+import { valitMenu } from "../../../utils/validate";
 export default {
   props: ["info", "list"],
   data() {
     return {
       menu: {
-        pid: 0,
+        pid: "",
         title: "",
         icon: "",
         type: 1,
@@ -76,23 +78,6 @@ export default {
     };
   },
   methods: {
-    valitMenu() {
-      return new Promise((resolve, reject) => {
-        if (this.menu.title === "") {
-          errorAlert("请输入菜单名称");
-          return;
-        }
-        if (this.menu.pid === 0 && this.menu.icon === "") {
-          errorAlert("请选择菜单图标");
-          return;
-        }
-        if (this.menu.pid !== 0 && this.menu.url === "") {
-          errorAlert("请选择菜单路径");
-          return;
-        }
-        resolve();
-      });
-    },
     clearMenu() {
       this.menu = {
         pid: 0,
@@ -112,7 +97,7 @@ export default {
       this.info.isshow = false;
     },
     add() {
-      this.valitMenu().then(() => {
+      valitMenu(this.menu).then(() => {
         //添加操作
         reqMenuAdd(this.menu).then((res) => {
           if (res.data.code == 200) {
@@ -148,7 +133,7 @@ export default {
       });
     },
     edit() {
-      this.valitMenu().then((res) => {
+      valitMenu(this.menu).then((res) => {
         reqMenuUpdate(this.menu).then((res) => {
           if (res.data.code === 200) {
             successAlert(res.data.msg);

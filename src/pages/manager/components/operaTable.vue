@@ -34,6 +34,7 @@
 import { mapGetters, mapActions } from "vuex";
 import { reqUserAdd, getUserDetail, reqUserUpdate } from "../../../utils/http";
 import { errorAlert, successAlert } from "../../../utils/alert";
+import { valitManager } from "../../../utils/validate";
 export default {
   props: ["info", "roles"],
   data() {
@@ -47,23 +48,6 @@ export default {
     };
   },
   methods: {
-    valitManager() {
-      return new Promise((resolve, reject) => {
-        if (this.manager.roleid === 0) {
-          errorAlert("请选择所属角色");
-          return;
-        }
-        if (this.manager.username === "") {
-          errorAlert("请输入用户名");
-          return;
-        }
-        if (this.manager.password === "") {
-          errorAlert("请输入密码");
-          return;
-        }
-        resolve();
-      });
-    },
     clearManager() {
       this.manager = {
         roleid: 0,
@@ -80,7 +64,7 @@ export default {
       this.info.isshow = false;
     },
     add() {
-      this.valitManager().then(() => {
+      valitManager(this.manager, true).then(() => {
         //添加操作
         this.manager.password = this.password;
         reqUserAdd(this.manager).then((res) => {
@@ -98,13 +82,11 @@ export default {
       });
     },
     getDetail(id) {
-      console.log(id);
       //获取一条会员的信息
       getUserDetail({ uid: id }).then((res) => {
         if (res.data.code === 200) {
           this.manager = res.data.list;
           this.manager.uid = id;
-          console.log(this.manager);
           //判断当前管理员所对应的角色有没有被删除
           let index = this.roles.findIndex((item) => {
             return this.manager.roleid === item.id;
@@ -118,7 +100,7 @@ export default {
       //赋值
     },
     edit() {
-      this.valitManager().then(() => {
+      valitManager(this.manager).then(() => {
         //做修改操作
         console.log(this.manager);
         reqUserUpdate(this.manager).then((res) => {

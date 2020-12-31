@@ -34,6 +34,7 @@ import {
   reqBannerUpdate,
   reqBannerAdd,
 } from "../../../utils/http";
+import { valitBanner } from "../../../utils/validate";
 export default {
   props: ["info"],
   data() {
@@ -49,19 +50,19 @@ export default {
     };
   },
   methods: {
-    valitBanner() {
-      return new Promise((resolve, reject) => {
-        if (this.banner.title === "") {
-          errorAlert("请输入标题");
-          return;
-        }
-        if (this.banner.img === null) {
-          errorAlert("请上传图片");
-          return;
-        }
-        resolve();
-      });
-    },
+    // valitBanner() {
+    //   return new Promise((resolve, reject) => {
+    //     if (this.banner.title === "") {
+    //       errorAlert("请输入标题");
+    //       return;
+    //     }
+    //     if (this.banner.img === null) {
+    //       errorAlert("请上传图片");
+    //       return;
+    //     }
+    //     resolve();
+    //   });
+    // },
     clearBanner() {
       this.banner = {
         title: "",
@@ -77,7 +78,7 @@ export default {
       this.info.isshow = false;
     },
     add() {
-      this.valitBanner().then(() => {
+      valitBanner(this.banner).then(() => {
         reqBannerAdd(this.banner).then((res) => {
           if (res.data.code === 200) {
             successAlert(res.data.msg);
@@ -102,7 +103,7 @@ export default {
       });
     },
     edit() {
-      this.valitBanner().then(() => {
+      valitBanner(this.banner).then(() => {
         //修改操作
         reqBannerUpdate(this.banner).then((res) => {
           if (res.data.code === 200) {

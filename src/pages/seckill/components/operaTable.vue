@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import { valitSeckill } from "../../../utils/validate";
 import { reqSeckAdd, getSeckDetail, reqSeckUpdate } from "../../../utils/http";
 import { mapGetters, mapActions } from "vuex";
 import { errorAlert, successAlert } from "../../../utils/alert";
@@ -88,29 +89,6 @@ export default {
     }),
   },
   methods: {
-    valitSeckill() {
-      if (this.seckill.title === "") {
-        errorAlert("请输入活动名称");
-        return;
-      }
-      if (this.time.length === 0) {
-        errorAlert("请选择时间");
-        return;
-      }
-      if (this.seckill.first_cateid === "") {
-        errorAlert("请选择一级分类");
-        return;
-      }
-      if (this.seckill.second_cateid === "") {
-        errorAlert("请选择二级分类");
-        return;
-      }
-      if (this.seckill.goodsid === "") {
-        errorAlert("请选择商品");
-        return;
-      }
-      resolve();
-    },
     //点击取消  和关闭对话框
     cancel() {
       if (!this.info.isadd) {
@@ -152,7 +130,7 @@ export default {
     },
     //添加
     add() {
-      this.valitSeckill().then(() => {
+      valitSeckill(this.seckill, this.time).then(() => {
         //分别给开始时间和结束时间赋值
         this.seckill.begintime = new Date(this.time[0]).getTime();
         this.seckill.endtime = new Date(this.time[1]).getTime();
@@ -188,20 +166,22 @@ export default {
     },
     //修改
     edit() {
-      this.valitSeckill().then(() => {
-        //给开始和结束时间赋值
-        this.seckill.begintime = new Date(this.time[0]).getTime();
-        this.seckill.endtime = new Date(this.time[1]).getTime();
-        reqSeckUpdate(this.seckill).then((res) => {
-          if (res.data.code == 200) {
-            successAlert(res.data.msg);
-            this.cancel();
-            this.clearSeckill();
-            //刷新页面
-            this.$emit("init");
-          }
-        });
-      });
+      valitSeckill(this.seckill, this.time)
+        .then(() => {
+          //给开始和结束时间赋值
+          this.seckill.begintime = new Date(this.time[0]).getTime();
+          this.seckill.endtime = new Date(this.time[1]).getTime();
+          reqSeckUpdate(this.seckill).then((res) => {
+            if (res.data.code == 200) {
+              successAlert(res.data.msg);
+              this.cancel();
+              this.clearSeckill();
+              //刷新页面
+              this.$emit("init");
+            }
+          });
+        })
+        .catch((s) => {});
     },
     //当一级分类菜单发生改变时触发的函数
     changeCate(id) {

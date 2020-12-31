@@ -87,6 +87,7 @@
 import E from "wangeditor";
 import { mapGetters, mapActions } from "vuex";
 import { errorAlert, successAlert } from "../../../utils/alert";
+import { valitGoods } from "../../../utils/validate";
 import {
   reqGoodsAdd,
   getGoodsDetail,
@@ -119,47 +120,6 @@ export default {
     };
   },
   methods: {
-    valitGoods() {
-      return new Promise((resolve, reject) => {
-        if (this.goods.first_cateid === "") {
-          errorAlert("请选择一级分类");
-          return;
-        }
-        if (this.goods.second_cateid === "") {
-          errorAlert("请选择二级分类");
-          return;
-        }
-        if (this.goods.goodsname === "") {
-          errorAlert("请输入商品名称");
-          return;
-        }
-        if (this.goods.price === "") {
-          errorAlert("请输入商品价格");
-          return;
-        }
-        if (this.goods.market_price === "") {
-          errorAlert("请输入商品市场价格");
-          return;
-        }
-        if (this.goods.img === null) {
-          errorAlert("请上传图片");
-          return;
-        }
-        if (this.goods.specsid === "") {
-          errorAlert("请选择商品规格");
-          return;
-        }
-        if (this.goods.specsattr.length === 0) {
-          errorAlert("请选择规格属性");
-          return;
-        }
-        if (this.editor.txt.html() === "") {
-          errorAlert("请输入商品描述");
-          return;
-        }
-        resolve();
-      });
-    },
     del(id) {
       //删除
       reqGoodsDelete({ id: id }).then((res) => {
@@ -169,7 +129,8 @@ export default {
       });
     },
     add() {
-      this.valitGoods().then(() => {
+      let txt = this.editor.txt.html();
+      valitGoods(this.goods, txt).then(() => {
         //add操作
         //获取内容并赋值
         this.goods.description = this.editor.txt.html();
@@ -212,7 +173,8 @@ export default {
       });
     },
     edit() {
-      this.valitGoods().then(() => {
+      let txt = this.editor.txt.html();
+      valitGoods(this.goods, txt).then(() => {
         this.goods.description = this.editor.txt.html();
         let data = {
           ...this.goods,

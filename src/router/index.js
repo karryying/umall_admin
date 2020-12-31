@@ -3,11 +3,11 @@ import Router from 'vue-router'
 import store from "../store"
 
 function valiRouter(path, next) {
-  if (!store.state.userInfo.menus_url.includes(path)) {
-    next("/");
+  if (store.state.userInfo.menus_url.includes(path)) {
+    next();
     return;
   }
-  next();
+  next("/");
 }
 
 Vue.use(Router)
@@ -99,7 +99,6 @@ let router = new Router({
       children: [
         {
           path: "",
-          name: "首页",
           component: () => import("../pages/home/home.vue")
         },
         ...indexRouter
@@ -109,22 +108,22 @@ let router = new Router({
 })
 
 // //进行拦截
-// router.beforeEach((to, from, next) => {
-//   //如果是去登录就不拦截
-//   //获取用户登录信息
-//   let isLogin = store.state.userInfo;
-//   if (to.path === "/login") {
-//     next();
-//     return;
-//   }
+router.beforeEach((to, from, next) => {
+  //如果是去登录就不拦截
+  //获取用户登录信息
+  let isLogin = store.state.userInfo;
+  if (to.path === "/login") {
+    next();
+    return;
+  }
 
-//   console.log(isLogin);
-//   if (!isLogin.id) {
-//     next("/login");
-//     return;
-//   }
-//   next();
-// })
+  console.log(isLogin);
+  if (!isLogin.id) {
+    next("/login");
+    return;
+  }
+  next();
+})
 
 
 export default router
